@@ -1,0 +1,14 @@
+{
+  "apps": [
+    {
+      "name": "train-hannam",
+      "script": "/root/jisic/train.py",
+      "args": [
+      ],
+      "wait_ready": false,
+      "autorestart": false,
+      "max_restarts": 5,
+      "interpreter": "/usr/bin/python"
+    }
+  ]
+}

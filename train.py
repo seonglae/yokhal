@@ -13,7 +13,7 @@ dataset_infos = [
 ]
 
 torch.manual_seed(0)
-def train(base='google/gemma-2b-it', save_local=True, push=False,
+def prediction(base='google/gemma-2b-it', save_local=True, push=False,
           epoch=5, batch=3, output="./hannam-2b"):
 
   # Load the dataset and format it for training.
@@ -37,13 +37,15 @@ def train(base='google/gemma-2b-it', save_local=True, push=False,
         if col != 'text':
           formated[split] = formated[split].remove_columns(col)
       eval_ds = concatenate_datasets([formated[split], eval_ds])
-
+  print(f"Train data: {len(train_ds)} Eval data: {len(eval_ds)}")
+  
   # Load the pretrained model and tokenizer.
   max_seq_length = 1024
   tokenizer = AutoTokenizer.from_pretrained(base)
-  model = AutoModelForCausalLM.from_pretrained(base,
+  model: AutoModelForCausalLM = AutoModelForCausalLM.from_pretrained(base,
                                                torch_dtype=torch.bfloat16,
                                                device_map="auto")
+  print(f'Special tokens: {tokenizer.all_special_tokens}')
 
   # Finally, set up the trainer and train the model.
   trainer = SFTTrainer(
@@ -52,10 +54,15 @@ def train(base='google/gemma-2b-it', save_local=True, push=False,
     eval_dataset=eval_ds,
     args=TrainingArguments(
         per_device_train_batch_size=batch,
+        per_device_eval_batch_size=batch,
         num_train_epochs=epoch,
         output_dir=output,
         optim="adafactor",
-        logging_steps=100,
+        logging_steps=10,
+        save_steps=100,
+        eval_steps=100,
+        learning_rate=1e-5,
+        evaluation_strategy='steps'
     ),
     dataset_text_field="text",
     max_seq_length=max_seq_length,
@@ -74,4 +81,4 @@ def train(base='google/gemma-2b-it', save_local=True, push=False,
 
 
 if __name__ == '__main__':
-  fire.Fire(train)
+  fire.Fire()
