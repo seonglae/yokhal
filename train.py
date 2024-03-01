@@ -2,7 +2,7 @@ import torch
 import fire
 
 from datasets import load_dataset, Dataset, concatenate_datasets
-from transformers import AutoTokenizer, AutoModelForCausalLM, TrainingArguments
+from transformers import AutoTokenizer, AutoModelForCausalLM, TrainingArguments, PreTrainedModel
 
 from trl import SFTTrainer
 
@@ -42,7 +42,7 @@ def prediction(base='google/gemma-2b-it', save_local=True, push=False,
   # Load the pretrained model and tokenizer.
   max_seq_length = 1024
   tokenizer = AutoTokenizer.from_pretrained(base)
-  model: AutoModelForCausalLM = AutoModelForCausalLM.from_pretrained(base,
+  model: PreTrainedModel = AutoModelForCausalLM.from_pretrained(base,
                                                torch_dtype=torch.bfloat16,
                                                device_map="auto")
   print(f'Special tokens: {tokenizer.all_special_tokens}')

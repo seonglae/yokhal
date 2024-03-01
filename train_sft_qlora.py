@@ -111,7 +111,7 @@ lora_config = LoraConfig(
 train_dataset = load_dataset(script_args.dataset_name, split="train[:5%]")
 
 # TODO: make that configurable
-YOUR_HF_USERNAME = xxx
+YOUR_HF_USERNAME = ''
 output_dir = f"{YOUR_HF_USERNAME}/gemma-qlora-ultrachat"
 
 training_arguments = TrainingArguments(
