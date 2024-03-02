@@ -1,22 +1,22 @@
 import torch
 import fire
 
-from hannam.dataset import get_comment_dataset
+from hannam.dataset import get_dataset
 from transformers import AutoTokenizer, AutoModelForCausalLM, TrainingArguments, PreTrainedModel
 
 from trl import SFTTrainer
 
 
 torch.manual_seed(0)
-def prediction(base='google/gemma-2b-it', save_local=True, push=False,
-          epoch=5, batch=3, output="./hannam-2b"):
+def finetune(base='seonglae/hannam-2b', save_local=True, push=False,
+          epoch=2, batch=1, output="./hannam-2b", target="wiki"):
 
   # Load the dataset and format it for training.
-  train_ds, eval_ds = get_comment_dataset()
+  train_ds, eval_ds = get_dataset(target)
   print(f"Train data: {len(train_ds)} Eval data: {len(eval_ds)}")
   
   # Load the pretrained model and tokenizer.
-  max_seq_length = 1024
+  max_seq_length = 4096
   tokenizer = AutoTokenizer.from_pretrained(base)
   model: PreTrainedModel = AutoModelForCausalLM.from_pretrained(base,
                                                torch_dtype=torch.bfloat16,
@@ -35,7 +35,7 @@ def prediction(base='google/gemma-2b-it', save_local=True, push=False,
         output_dir=output,
         optim="adafactor",
         logging_steps=10,
-        save_steps=100,
+        save_steps=1000,
         eval_steps=100,
         learning_rate=1e-5,
         evaluation_strategy='steps'
@@ -44,7 +44,6 @@ def prediction(base='google/gemma-2b-it', save_local=True, push=False,
     max_seq_length=max_seq_length,
     packing=True,
   )
-
   trainer.train()
 
   if save_local:

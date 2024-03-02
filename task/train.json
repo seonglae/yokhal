@@ -4,6 +4,7 @@
       "name": "train-hannam",
       "script": "/root/jisic/train.py",
       "args": [
+        "finetune"
       ],
       "wait_ready": false,
       "autorestart": false,
