@@ -9,14 +9,14 @@ from trl import SFTTrainer
 
 torch.manual_seed(0)
 def finetune(base='seonglae/hannam-2b', save_local=True, push=False,
-          epoch=2, batch=1, output="./hannam-2b", target="wiki"):
+          epoch=1, batch=3, output="./hannam-2b", target="wiki", max_length = 1024,
+          log_steps=10, save_steps=100, eval_steps=100, lr=1e-5, optim='adafactor'):
 
   # Load the dataset and format it for training.
   train_ds, eval_ds = get_dataset(target)
   print(f"Train data: {len(train_ds)} Eval data: {len(eval_ds)}")
   
   # Load the pretrained model and tokenizer.
-  max_seq_length = 4096
   tokenizer = AutoTokenizer.from_pretrained(base)
   model: PreTrainedModel = AutoModelForCausalLM.from_pretrained(base,
                                                torch_dtype=torch.bfloat16,
@@ -33,15 +33,15 @@ def finetune(base='seonglae/hannam-2b', save_local=True, push=False,
         per_device_eval_batch_size=batch,
         num_train_epochs=epoch,
         output_dir=output,
-        optim="adafactor",
-        logging_steps=10,
-        save_steps=1000,
-        eval_steps=100,
-        learning_rate=1e-5,
+        optim=optim,
+        logging_steps=log_steps,
+        save_steps=save_steps,
+        eval_steps=eval_steps,
+        learning_rate=lr,
         evaluation_strategy='steps'
     ),
     dataset_text_field="text",
-    max_seq_length=max_seq_length,
+    max_seq_length=max_length,
     packing=True,
   )
   trainer.train()

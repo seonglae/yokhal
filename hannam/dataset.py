@@ -25,7 +25,7 @@ def get_dataset(target: str):
       newrow = {'text': text}
       return newrow
     formated = load_dataset(dataset_info['id']).map(map_row)
-    if dataset_info['ratio']:
+    if 'ratio' in dataset_info:
       formated = formated['train'].train_test_split(dataset_info['ratio'])
     for split in dataset_info['train']:
       for col in formated[split].column_names:
