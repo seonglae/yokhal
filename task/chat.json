@@ -1,0 +1,14 @@
+{
+  "apps": [
+    {
+      "name": "train-chat",
+      "script": "/root/jisic/train_sft_qlora.py",
+      "args": [
+      ],
+      "wait_ready": false,
+      "autorestart": false,
+      "max_restarts": 5,
+      "interpreter": "/usr/bin/python"
+    }
+  ]
+}
