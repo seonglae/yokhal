@@ -2,8 +2,9 @@
   "apps": [
     {
       "name": "train-chat",
-      "script": "/root/hannam/train_sft_qlora.py",
+      "script": "/root/hannam/train.py",
       "args": [
+        "adapt"
       ],
       "wait_ready": false,
       "autorestart": false,
