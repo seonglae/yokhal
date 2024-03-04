@@ -2,7 +2,7 @@
   "apps": [
     {
       "name": "train-hannam",
-      "script": "/root/jisic/train.py",
+      "script": "/root/hannam/train.py",
       "args": [
         "finetune"
       ],

@@ -2,7 +2,7 @@
   "apps": [
     {
       "name": "train-chat",
-      "script": "/root/jisic/train_sft_qlora.py",
+      "script": "/root/hannam/train_sft_qlora.py",
       "args": [
       ],
       "wait_ready": false,
