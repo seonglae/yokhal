@@ -5,9 +5,10 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 from peft import PeftModel
 
 
-def test(device, model_id='hannam-md', push=None):
+def test(device, model_id='hannam-md', push=None, tag=None):
   # Load the pretrained model and tokenizer.
   tokenizer = AutoTokenizer.from_pretrained(model_id)
+  model: AutoModelForCausalLM
   try:
     model = AutoModelForCausalLM.from_pretrained(model_id, 
                                                  torch_dtype=torch.bfloat16,
@@ -34,7 +35,7 @@ def test(device, model_id='hannam-md', push=None):
 
   if push:
     model.name_or_path = push
-    model.push_to_hub(push, commit_message=model_id, tags=[model_id.split('/')[-1]])
+    model.push_to_hub(push, commit_message=model_id, revision='main' if tag is None else tag)
     tokenizer.push_to_hub(push, commit_message=model_id)
 
 if __name__ == '__main__':
