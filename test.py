@@ -5,7 +5,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 from peft import PeftModel
 
 
-def test(device, model_id='hannam-md', push=None, tag=None):
+def test(device=None, model_id='seonglae/hannam-md', push=None, tag=None):
   # Load the pretrained model and tokenizer.
   tokenizer = AutoTokenizer.from_pretrained(model_id)
   model: AutoModelForCausalLM
