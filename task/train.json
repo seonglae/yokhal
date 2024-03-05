@@ -4,7 +4,8 @@
       "name": "train-yokhal",
       "script": "/root/yokhal/train.py",
       "args": [
-        "finetune"
+        "finetune",
+        "--target=comment"
       ],
       "wait_ready": false,
       "autorestart": false,

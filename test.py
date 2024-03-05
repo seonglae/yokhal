@@ -28,7 +28,7 @@ def test(device=None, model_id='seonglae/yokhal-md', push=None, tag=None):
   chats = list(map(lambda t: [{'role': 'user', 'content': f'{sys_prompt}\n{t}'}], texts))
   prompts = list(map(lambda p: tokenizer.apply_chat_template(p, tokenize=False, add_generation_prompt=True), chats))
   input_ids = tokenizer(prompts, return_tensors="pt", padding=True).to("cuda" if device is None else device)
-  outputs = model.generate(**input_ids, max_new_tokens=100, repetition_penalty=1.05)
+  outputs = model.generate(**input_ids, max_new_tokens=100, repetition_penalty=1.0)
   for output in outputs:
     print(tokenizer.decode(output, skip_special_tokens=True), end='\n\n')
 

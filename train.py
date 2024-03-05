@@ -17,7 +17,7 @@ torch.manual_seed(0)
 
 
 class yokhalTrainer():
-  def finetune(self, base='seonglae/yokhal-md', save_local=True, push=False,
+  def finetune(self, base='seonglae/yokhal-md', save_local=True, push=False, resume=False,
                epoch=1, batch=3, output="./yokhal-md", target="wiki", max_length=1024,
                log_steps=10, save_steps=100, eval_steps=100, lr=1e-5, optim='adafactor'):
 
@@ -53,7 +53,7 @@ class yokhalTrainer():
         max_seq_length=max_length,
         packing=True,
     )
-    trainer.train(resume_from_checkpoint=True)
+    trainer.train(resume_from_checkpoint=resume)
     self.push(model, tokenizer, output, save_local=save_local, push=push)
 
   def adapt(self, model_id='seonglae/yokhal-md', save_local=True, push=False,
