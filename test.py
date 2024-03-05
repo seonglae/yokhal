@@ -5,7 +5,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 from peft import PeftModel
 
 
-def test(device=None, model_id='seonglae/hannam-md', push=None, tag=None):
+def test(device=None, model_id='seonglae/yokhal-md', push=None, tag=None):
   # Load the pretrained model and tokenizer.
   tokenizer = AutoTokenizer.from_pretrained(model_id)
   model: AutoModelForCausalLM
@@ -30,8 +30,7 @@ def test(device=None, model_id='seonglae/hannam-md', push=None, tag=None):
   input_ids = tokenizer(prompts, return_tensors="pt", padding=True).to("cuda" if device is None else device)
   outputs = model.generate(**input_ids, max_new_tokens=100, repetition_penalty=1.05)
   for output in outputs:
-    print(tokenizer.decode(output, skip_special_tokens=True))
-    print()
+    print(tokenizer.decode(output, skip_special_tokens=True), end='\n\n')
 
   if push:
     model.name_or_path = push

@@ -2,7 +2,7 @@
   "apps": [
     {
       "name": "train-chat",
-      "script": "/root/hannam/train.py",
+      "script": "/root/yokhal/train.py",
       "args": [
         "adapt"
       ],

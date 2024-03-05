@@ -1,8 +1,8 @@
 {
   "apps": [
     {
-      "name": "train-hannam",
-      "script": "/root/hannam/train.py",
+      "name": "train-yokhal",
+      "script": "/root/yokhal/train.py",
       "args": [
         "finetune"
       ],

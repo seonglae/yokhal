@@ -9,16 +9,16 @@ from datasets import load_dataset
 from peft import LoraConfig
 from trl import SFTTrainer
 
-from hannam.dataset import get_dataset
-from hannam.adapt import ScriptArguments, make_format_func, quantization_config
+from yokhal.dataset import get_dataset
+from yokhal.adapt import ScriptArguments, make_format_func, quantization_config
 
 
 torch.manual_seed(0)
 
 
-class HannamTrainer():
-  def finetune(self, base='seonglae/hannam-md', save_local=True, push=False,
-               epoch=1, batch=3, output="./hannam-md", target="wiki", max_length=1024,
+class yokhalTrainer():
+  def finetune(self, base='seonglae/yokhal-md', save_local=True, push=False,
+               epoch=1, batch=3, output="./yokhal-md", target="wiki", max_length=1024,
                log_steps=10, save_steps=100, eval_steps=100, lr=1e-5, optim='adafactor'):
 
     # Load the dataset and format it for training.
@@ -56,8 +56,8 @@ class HannamTrainer():
     trainer.train(resume_from_checkpoint=True)
     self.push(model, tokenizer, output, save_local=save_local, push=push)
 
-  def adapt(self, model_id='seonglae/hannam-md', save_local=True, push=False,
-               epoch=1, batch=3, output="./hannam-md"):
+  def adapt(self, model_id='seonglae/yokhal-md', save_local=True, push=False,
+               epoch=1, batch=3, output="./yokhal-md"):
     parser = HfArgumentParser(ScriptArguments)
     script_args = parser.parse_args_into_dataclasses()[0]
     model = AutoModelForCausalLM.from_pretrained(model_id, 
@@ -127,4 +127,4 @@ class HannamTrainer():
 
 
 if __name__ == '__main__':
-  fire.Fire(HannamTrainer)
+  fire.Fire(yokhalTrainer)
