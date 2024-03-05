@@ -17,8 +17,8 @@ torch.manual_seed(0)
 
 
 class HannamTrainer():
-  def finetune(self, base='seonglae/hannam-2b', save_local=True, push=False,
-               epoch=1, batch=3, output="./hannam-2b", target="wiki", max_length=1024,
+  def finetune(self, base='seonglae/hannam-md', save_local=True, push=False,
+               epoch=1, batch=3, output="./hannam-md", target="wiki", max_length=1024,
                log_steps=10, save_steps=100, eval_steps=100, lr=1e-5, optim='adafactor'):
 
     # Load the dataset and format it for training.
@@ -56,8 +56,8 @@ class HannamTrainer():
     trainer.train(resume_from_checkpoint=True)
     self.push(model, tokenizer, output, save_local=save_local, push=push)
 
-  def adapt(self, model_id='seonglae/hannam-2b', save_local=True, push=False,
-               epoch=1, batch=3, output="./hannam-2b"):
+  def adapt(self, model_id='seonglae/hannam-md', save_local=True, push=False,
+               epoch=1, batch=3, output="./hannam-md"):
     parser = HfArgumentParser(ScriptArguments)
     script_args = parser.parse_args_into_dataclasses()[0]
     model = AutoModelForCausalLM.from_pretrained(model_id, 

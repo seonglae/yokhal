@@ -5,7 +5,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 from peft import PeftModel
 
 
-def test(device, model_id='hannam-2b', push=None):
+def test(device, model_id='hannam-md', push=None):
   # Load the pretrained model and tokenizer.
   tokenizer = AutoTokenizer.from_pretrained(model_id)
   try:
@@ -27,14 +27,14 @@ def test(device, model_id='hannam-2b', push=None):
   chats = list(map(lambda t: [{'role': 'user', 'content': f'{sys_prompt}\n{t}'}], texts))
   prompts = list(map(lambda p: tokenizer.apply_chat_template(p, tokenize=False, add_generation_prompt=True), chats))
   input_ids = tokenizer(prompts, return_tensors="pt", padding=True).to("cuda" if device is None else device)
-  outputs = model.generate(**input_ids, max_new_tokens=100, repetition_penalty=1.99)
+  outputs = model.generate(**input_ids, max_new_tokens=100, repetition_penalty=1.05)
   for output in outputs:
     print(tokenizer.decode(output, skip_special_tokens=True))
     print()
 
   if push:
     model.name_or_path = push
-    model.push_to_hub(push, commit_message=model_id)
+    model.push_to_hub(push, commit_message=model_id, tags=[model_id.split('/')[-1]])
     tokenizer.push_to_hub(push, commit_message=model_id)
 
 if __name__ == '__main__':
