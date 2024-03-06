@@ -115,11 +115,10 @@ class yokhalTrainer():
     trainer.train(resume_from_checkpoint=True)
     self.push(model, tokenizer, output, save_local=save_local, push=push)
 
-  def push(self, model: AutoModelForCausalLM, tokenizer, output, save_local, push):
+  def push(self, model: AutoModelForCausalLM, tokenizer: AutoTokenizer, output, save_local, push):
     if save_local:
       model.save_pretrained(output)
       tokenizer.save_pretrained(output)
-      tokenizer.save_vocabulary(output)
     if push:
       model.name_or_path = push
       model.push_to_hub(push)
