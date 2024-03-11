@@ -74,6 +74,29 @@ class YokhalTester:
     if push:
       self.push()
 
+  def ppl(self, device=None, model_id='seonglae/yokhal-md', ds='kor_hate', split='test', col='comments'):
+    """calculate inference perplexity
+
+    Args:
+        device (str, optional): torch device. Defaults to None.
+        model_id (str, optional): local path or model id. Defaults to 'seonglae/yokhal-md'.
+        ds (str, optional): Dataset id. Defaults to 'kor_hate'.
+        split (str, optional): Dataset split. Defaults to 'test'.
+        col (str, optional): Text column of the dataset. Defaults to 'comments'.
+    """
+    self.load(model_id, device)
+    from evaluate import load 
+    from datasets import load_dataset
+
+    perplexity = load("yokhal/perplexity.py", module_type="metric")
+    texts = load_dataset(ds, split=split)[col]
+    self.load(model_id)
+    results = perplexity.compute(model=self.model, tokenizer=self.tokenizer,
+                                 add_start_token=True,
+                                 predictions=texts,
+                                 device=default)
+    print(f'Mean Perplexity: {round(results["mean_perplexity"], 2)}')
+
   def push(self, push_to, message, tag=None):
     self.model.name_or_path = push_to
     self.model.push_to_hub(push_to, commit_message=message,
