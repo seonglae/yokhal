@@ -29,7 +29,7 @@ class yokhalTrainer():
 
     # Load the pretrained model and tokenizer.
     self.tokenizer = AutoTokenizer.from_pretrained(base)
-    self.model: PreTrainedModel = AutoModelForCausalLM.from_pretrained(base,
+    self.model = AutoModelForCausalLM.from_pretrained(base,
                                                                        torch_dtype=torch.bfloat16,
                                                                        device_map="auto")
     logging.info(f'Special tokens: {self.tokenizer.all_special_tokens}')
