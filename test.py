@@ -39,7 +39,7 @@ class YokhalTester:
                                                    attn_implementation=flash)
     except Exception as e:
       logging.error(e)
-      logging.warn('Fallback into PEFT model loading...')
+      logging.warning('Fallback into PEFT model loading...')
       self.model = AutoModelForCausalLM.from_pretrained('google/gemma-2b',
                                                    torch_dtype=torch.bfloat16,
                                                    device_map="auto" if device is None else device,

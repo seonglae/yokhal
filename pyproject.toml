@@ -7,7 +7,7 @@ dependencies = [
   "bitsandbytes==0.42.0",
   "peft>=0.9.0",
   "trl>=0.7.11",
-  "torch>=2.2.1",
+  "torch>=2.1.2",
   "fire>=0.5.0",
 ]
 description = "Add your description here"
