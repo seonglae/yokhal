@@ -30,6 +30,7 @@ class yokhalTrainer():
     # Load the pretrained model and tokenizer.
     flash = "sdpa" if hasattr(torch.nn.functional, 'scaled_dot_product_attention') else None
     self.tokenizer = AutoTokenizer.from_pretrained(base)
+    self.tokenizer.padding_side = 'right'
     self.model = AutoModelForCausalLM.from_pretrained(base, attn_implementation=flash,
                                                       torch_dtype=torch.bfloat16,
                                                       device_map="auto" if device is None else device)
@@ -60,16 +61,16 @@ class yokhalTrainer():
     self.push(output, save_local=save_local, push=push)
 
   def adapt(self, model_id='seonglae/yokhal-md', save_local=True, push=False,
-            epoch=1, batch=3, output="./yokhal-md"):
+            epoch=1, batch=3, output="./yokhal-md", device=None):
     parser = HfArgumentParser(ScriptArguments)
     script_args = parser.parse_args_into_dataclasses()[0]
-    model = AutoModelForCausalLM.from_pretrained(model_id,
+    flash = "sdpa" if hasattr(torch.nn.functional, 'scaled_dot_product_attention') else None
+    self.model = AutoModelForCausalLM.from_pretrained(model_id,
                                                  quantization_config=quantization_config,
                                                  torch_dtype=torch.float16,
-                                                 attn_implementation="sdpa" if not script_args.use_flash_attention_2 else "flash_attention_2"
-                                                 )
-    tokenizer = AutoTokenizer.from_pretrained(model_id)
-    # tokenizer.pad_token_id = tokenizer.eos_token_id
+                                                 attn_implementation=flash)
+    self.tokenizer = AutoTokenizer.from_pretrained(model_id)
+    self.tokenizer.padding_side = 'right'
     lora_config = LoraConfig(
         r=script_args.lora_r,
         target_modules=["q_proj", "o_proj", "k_proj",
@@ -107,17 +108,17 @@ class yokhalTrainer():
         bf16=script_args.bf16,
     )
     trainer = SFTTrainer(
-        model=model,
+        model=self.model,
         args=training_arguments,
         train_dataset=train_dataset,
         peft_config=lora_config,
         dataset_text_field="text",
         packing=script_args.packing,
-        tokenizer=tokenizer,
+        tokenizer=self.tokenizer,
         max_seq_length=script_args.max_seq_length,
     )
     trainer.train(resume_from_checkpoint=True)
-    self.push(model, tokenizer, output, save_local=save_local, push=push)
+    self.push(output, save_local=save_local, push=push)
 
   def push(self, output, save_local, push):
     if save_local:

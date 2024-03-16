@@ -19,6 +19,7 @@ class YokhalTester:
 
   def load(self, model_id, device=None):
     self.tokenizer = AutoTokenizer.from_pretrained(model_id)
+    self.tokenizer.padding_side = 'right'
     self.model: AutoModelForCausalLM
     try:
       import flash_attn
