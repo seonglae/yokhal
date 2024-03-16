@@ -20,7 +20,7 @@ class yokhalTrainer():
   tokenizer: AutoTokenizer
 
   def finetune(self, base='seonglae/yokhal-md', save_local=True, push=False, resume=False,
-               epoch=1, batch=3, output="./yokhal-md", target="wiki", max_length=1024,
+               epoch=1, batch=3, output="./yokhal-md", target="wiki", max_length=1024, device=None,
                log_steps=10, save_steps=100, eval_steps=100, lr=1e-5, optim='adafactor'):
 
     # Load the dataset and format it for training.
@@ -28,10 +28,11 @@ class yokhalTrainer():
     logging.info(f"Train data: {len(train_ds)} Eval data: {len(eval_ds)}")
 
     # Load the pretrained model and tokenizer.
+    flash = "sdpa" if hasattr(torch.nn.functional, 'scaled_dot_product_attention') else None
     self.tokenizer = AutoTokenizer.from_pretrained(base)
-    self.model = AutoModelForCausalLM.from_pretrained(base,
-                                                                       torch_dtype=torch.bfloat16,
-                                                                       device_map="auto")
+    self.model = AutoModelForCausalLM.from_pretrained(base, attn_implementation=flash,
+                                                      torch_dtype=torch.bfloat16,
+                                                      device_map="auto" if device is None else device)
     logging.info(f'Special tokens: {self.tokenizer.all_special_tokens}')
 
     # Finally, set up the trainer and train the model.
