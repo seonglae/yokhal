@@ -34,3 +34,7 @@ ignore = ['E701']
 
 [tool.hatch.metadata]
 allow-direct-references = true
+
+[tool.ruff]
+indent-width = 2
+line-length = 125
