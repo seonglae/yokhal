@@ -55,25 +55,16 @@ class yokhalTrainer:
     save_steps=100,
     eval_steps=100,
     lr=1e-5,
-    optim="adafactor",
+    optim="paged_adamw_8bit",
     fsdp=False,
   ):
     # Load the dataset and format it for training.
     train_ds, eval_ds = get_dataset(target)
     logging.info(f"Train data: {len(train_ds)} Eval data: {len(eval_ds)}")
-    if fsdp:
-      if device is None:
-        device = "cuda"
-      from accelerate import FullyShardedDataParallelPlugin, Accelerator
-      from torch.distributed.fsdp.fully_sharded_data_parallel import FullOptimStateDictConfig, FullStateDictConfig
-
-      fsdp_plugin = FullyShardedDataParallelPlugin(
-        state_dict_config=FullStateDictConfig(offload_to_cpu=False, rank0_only=False),
-        optim_state_dict_config=FullOptimStateDictConfig(offload_to_cpu=False, rank0_only=False),
-      )
-      accelerator = Accelerator(fsdp_plugin=fsdp_plugin)
-      accelerator.wait_for_everyone()
     self.load(base, device)
+
+    if fsdp and device is None:
+        device = "cuda"
 
     # Finally, set up the trainer and train the model.
     trainer = SFTTrainer(
@@ -97,7 +88,28 @@ class yokhalTrainer:
       max_seq_length=max_length,
       packing=True,
     )
-    trainer.train(resume_from_checkpoint=resume)
+    if fsdp:
+      from accelerate import FullyShardedDataParallelPlugin, Accelerator
+      from torch.distributed.fsdp.fully_sharded_data_parallel import FullOptimStateDictConfig, FullStateDictConfig
+      fsdp_plugin = FullyShardedDataParallelPlugin(
+        state_dict_config=FullStateDictConfig(offload_to_cpu=False, rank0_only=False),
+        optim_state_dict_config=FullOptimStateDictConfig(offload_to_cpu=False, rank0_only=False),
+      )
+      accelerator = Accelerator(fsdp_plugin=fsdp_plugin)
+      accelerator.wait_for_everyone()
+      model, optimizer, training_dataloader, scheduler = accelerator.prepare(
+          self.model, trainer.optimizer, trainer.get_train_dataloader(), trainer.get_train_dataloader()
+      )
+      for batch in training_dataloader:
+        optimizer.zero_grad()
+        inputs, targets = batch
+        outputs = model(inputs)
+        loss = trainer.compute_loss(model, outputs, targets)
+        accelerator.backward(loss)
+        optimizer.step()
+        scheduler.step()
+    else:
+      trainer.train(resume_from_checkpoint=resume)
     self.push(output, save_local=save_local, push=push)
 
   def adapt(
