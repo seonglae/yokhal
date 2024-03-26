@@ -85,7 +85,7 @@ class ScriptArguments:
       metadata={"help": "Enables Flash Attention 2."},
   )
   optim: Optional[str] = field(
-      default="paged_adamw_32bit",
+      default="paged_adamw_8bit",
       metadata={"help": "The optimizer to use."},
   )
   lr_scheduler_type: str = field(
