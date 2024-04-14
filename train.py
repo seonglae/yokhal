@@ -25,7 +25,7 @@ class yokhalTrainer:
   model: PreTrainedModel
   tokenizer: AutoTokenizer
 
-  def load(self, base: str, device: str, *model_args, **kwargs):
+  def _load(self, base: str, device: str, *model_args, **kwargs):
     # Load the pretrained model and tokenizer.
     flash = "sdpa" if hasattr(torch.nn.functional, "scaled_dot_product_attention") else None
     self.tokenizer = AutoTokenizer.from_pretrained(base)
@@ -61,7 +61,7 @@ class yokhalTrainer:
     # Load the dataset and format it for training.
     train_ds, eval_ds = get_dataset(target)
     logging.info(f"Train data: {len(train_ds)} Eval data: {len(eval_ds)}")
-    self.load(base, device)
+    self._load(base, device)
 
     if fsdp and device is None:
         device = "cuda"
@@ -110,7 +110,7 @@ class yokhalTrainer:
         scheduler.step()
     else:
       trainer.train(resume_from_checkpoint=resume)
-    self.push(output, save_local=save_local, push=push)
+    self._push(output, save_local=save_local, push=push)
 
   def adapt(
     self,
@@ -125,7 +125,7 @@ class yokhalTrainer:
     parser = HfArgumentParser(ScriptArguments)
     script_args = parser.parse_args_into_dataclasses()[0]
     
-    self.load(base, device, quantization_config=quantization_config)
+    self._load(base, device, quantization_config=quantization_config)
     lora_config = LoraConfig(
       r=script_args.lora_r,
       target_modules=[
@@ -180,9 +180,9 @@ class yokhalTrainer:
       max_seq_length=script_args.max_seq_length,
     )
     trainer.train(resume_from_checkpoint=True)
-    self.push(output, save_local=save_local, push=push)
+    self._push(output, save_local=save_local, push=push)
 
-  def push(self, output, save_local, push):
+  def _push(self, output, save_local, push):
     if save_local:
       self.model.save_pretrained(output)
       self.tokenizer.save_pretrained(output)

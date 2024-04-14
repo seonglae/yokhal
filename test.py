@@ -17,7 +17,7 @@ class YokhalTester:
   model: PreTrainedModel
   tokenizer: AutoTokenizer
 
-  def load(self, model_id, device=None):
+  def _load(self, model_id, device=None):
     self.tokenizer = AutoTokenizer.from_pretrained(model_id)
     self.tokenizer.padding_side = 'right'
     self.model: AutoModelForCausalLM
@@ -56,10 +56,14 @@ class YokhalTester:
         push (str, optional): If you want to push, pass id string to push like `seonglae/yokhal-md`. Defaults to None.
         tag (str, optional): If you want to push with tag revision to hub repository. Defaults to None.
     """
-    self.load(model_id, device)
-    sys_prompt = 'You are offensive AI who responses to user message. 한국어로 대답해'
-    texts = ['안녕', '서울은 오늘 어때']
+    self._load(model_id, device)
+    self._inference()
+    if push:
+      self._push()
 
+
+  def _inference(self, texts=['안녕', '서울은 오늘 어때'], sys_prompt='You are offensive AI who responses to user message. 한국어로 대답해',
+                device=None):
     # Inference
     chats = list(
         map(lambda t: [{'role': 'user', 'content': f'{sys_prompt}\n{t}'}], texts))
@@ -72,8 +76,6 @@ class YokhalTester:
     for output in outputs:
       print(self.tokenizer.decode(
           output, skip_special_tokens=True), end='\n\n')
-    if push:
-      self.push()
 
   def ppl(self, device=None, model_id='seonglae/yokhal-md', ds='kor_hate', split='test', col='comments'):
     """calculate inference perplexity
@@ -85,20 +87,20 @@ class YokhalTester:
         split (str, optional): Dataset split. Defaults to 'test'.
         col (str, optional): Text column of the dataset. Defaults to 'comments'.
     """
-    self.load(model_id, device)
+    self._load(model_id, device)
     from evaluate import load 
     from datasets import load_dataset
 
     perplexity = load("yokhal/perplexity.py", module_type="metric")
     texts = load_dataset(ds, split=split)[col]
-    self.load(model_id)
+    self._load(model_id)
     results = perplexity.compute(model=self.model, tokenizer=self.tokenizer,
                                  add_start_token=True,
                                  predictions=texts,
                                  device=default)
     print(f'Mean Perplexity: {round(results["mean_perplexity"], 2)}')
 
-  def push(self, push_to, message, tag=None):
+  def _push(self, push_to, message, tag=None):
     self.model.name_or_path = push_to
     self.model.push_to_hub(push_to, commit_message=message,
                            revision='main' if tag is None else tag)
