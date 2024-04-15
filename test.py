@@ -19,7 +19,7 @@ class YokhalTester:
 
   def _load(self, model_id, device=None):
     self.tokenizer = AutoTokenizer.from_pretrained(model_id)
-    self.tokenizer.padding_side = 'right'
+    self.tokenizer.padding_side = 'left'
     self.model: AutoModelForCausalLM
     try:
       import flash_attn
@@ -62,13 +62,16 @@ class YokhalTester:
       self._push()
 
 
-  def _inference(self, texts=['안녕', '서울은 오늘 어때'], sys_prompt='You are offensive AI who responses to user message. 한국어로 대답해',
-                device=None):
+  def _inference(self, texts=['Hello guys my name is ', 'What the fuck is'], sys_prompt='You are offensive AI who responses to user message. 한국어로 대답해',
+                device=None, chat: bool = True):
     # Inference
-    chats = list(
-        map(lambda t: [{'role': 'user', 'content': f'{sys_prompt}\n{t}'}], texts))
-    prompts = list(map(lambda p: self.tokenizer.apply_chat_template(
-        p, tokenize=False, add_generation_prompt=True), chats))
+    if chat:
+      chats = list(
+          map(lambda t: [{'role': 'user', 'content': f'{sys_prompt}\n{t}'}], texts))
+      prompts = list(map(lambda p: self.tokenizer.apply_chat_template(
+          p, tokenize=False, add_generation_prompt=True), chats))
+    else:
+      prompts = texts
     input_ids = self.tokenizer(prompts, return_tensors="pt", padding=True).to(
         default if device is None else device)
     outputs = self.model.generate(
@@ -105,7 +108,6 @@ class YokhalTester:
     self.model.push_to_hub(push_to, commit_message=message,
                            revision='main' if tag is None else tag)
     self.tokenizer.push_to_hub(push_to, commit_message=message)
-
 
 if __name__ == '__main__':
   fire.Fire(YokhalTester)
