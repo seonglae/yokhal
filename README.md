@@ -1,6 +1,8 @@
 # Yokhal (욕쟁이 할머니)
 Korean Chatbot based on Google Gemma
 
+<image src="https://github.com/seonglae/yokhal/assets/27716524/354a5787-6554-42ef-a869-10098ddf0f21" style="width: 30%"/>
+
 
 # Get started
 
